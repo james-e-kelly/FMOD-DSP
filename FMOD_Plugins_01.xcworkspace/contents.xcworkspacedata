@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Reverb/Reverb.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ParametricEQ/ParametricEQ.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:First Test/FMOD-Plugin/FMOD-Plugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Lowpass/LowpassPlugin/LowpassPlugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Delay/DelayPlugin/DelayPlugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SoftClipperPlugin/SoftClipperPlugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:HighpassPlugin/HighpassPlugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:HardClipPlugin/HardClipPlugin.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:DynamicFilter/DynamicFilter.xcodeproj">
+   </FileRef>
+</Workspace>
