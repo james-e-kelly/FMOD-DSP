@@ -22,14 +22,12 @@ extern "C"
 }
 
 // All Callback Function Definitions
-FMOD_RESULT Plugin_Create                    (FMOD_DSP_STATE *dsp_state);
-FMOD_RESULT Plugin_Release                   (FMOD_DSP_STATE *dsp_state);
-FMOD_RESULT Plugin_Reset                     (FMOD_DSP_STATE *dsp_state);
-FMOD_RESULT Plugin_Read                      (FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels);
-FMOD_RESULT Plugin_Process                   (FMOD_DSP_STATE *dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY *inbufferarray, FMOD_DSP_BUFFER_ARRAY *outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op);
-FMOD_RESULT Plugin_ShouldIProcess            (FMOD_DSP_STATE *dsp_state, FMOD_BOOL inputsidle, unsigned int length, FMOD_CHANNELMASK inmask, int inchannels, FMOD_SPEAKERMODE speakermode);
-FMOD_RESULT Plugin_SetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL value);
-FMOD_RESULT Plugin_GetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL *value, char *valuestr);
+FMOD_RESULT F_CALLBACK Plugin_Create                    (FMOD_DSP_STATE *dsp_state);
+FMOD_RESULT F_CALLBACK Plugin_Release                   (FMOD_DSP_STATE *dsp_state);
+FMOD_RESULT F_CALLBACK Plugin_Read                      (FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels);
+FMOD_RESULT F_CALLBACK Plugin_Process                   (FMOD_DSP_STATE *dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY *inbufferarray, FMOD_DSP_BUFFER_ARRAY *outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op);
+FMOD_RESULT F_CALLBACK Plugin_SetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL value);
+FMOD_RESULT F_CALLBACK Plugin_GetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL *value, char *valuestr);
 
 // Our parameters in the plugin
 static FMOD_DSP_PARAMETER_DESC mute;    // When true, mutes all audio input
@@ -50,7 +48,7 @@ FMOD_DSP_DESCRIPTION Silence_Desc =
     1,                          // no. output buffers
     Plugin_Create,              // create
     Plugin_Release,             // release
-    Plugin_Reset,               // reset
+    0,                          // reset
     0,                          // read
     Plugin_Process,             // process
     0,                          // setposition
@@ -64,7 +62,7 @@ FMOD_DSP_DESCRIPTION Silence_Desc =
     0,                          // Get int
     Plugin_GetBool,             // Get bool
     0,                          // Get data
-    Plugin_ShouldIProcess,      // Check states before processing
+    0,                          // Check states before processing
     0,                          // User data
     0,                          // System register
     0,                          // System deregister
@@ -89,20 +87,14 @@ F_EXPORT FMOD_DSP_DESCRIPTION* F_CALL FMODGetDSPDescription ()
 class TOmSSilenceState
 {
 public:
-    void SetMute(bool);
+    void SetMute(bool value) { m_mute = value; }
     bool GetMute() const { return m_mute; }
     
 private:
     bool m_mute;
 };
 
-void TOmSSilenceState::SetMute(bool value)
-{
-    m_mute = value;
-};
-
-
-FMOD_RESULT Plugin_Create                    (FMOD_DSP_STATE *dsp_state)
+FMOD_RESULT F_CALLBACK Plugin_Create                    (FMOD_DSP_STATE *dsp_state)
 {
     dsp_state->plugindata = (TOmSSilenceState* )FMOD_DSP_ALLOC(dsp_state, sizeof(TOmSSilenceState));
     if (!dsp_state->plugindata)
@@ -113,25 +105,14 @@ FMOD_RESULT Plugin_Create                    (FMOD_DSP_STATE *dsp_state)
     return FMOD_OK;
 }
 
-FMOD_RESULT Plugin_Release                   (FMOD_DSP_STATE *dsp_state)
+FMOD_RESULT F_CALLBACK Plugin_Release                   (FMOD_DSP_STATE *dsp_state)
 {
     TOmSSilenceState* state = (TOmSSilenceState* )dsp_state->plugindata;
     FMOD_DSP_FREE(dsp_state, state);
     return FMOD_OK;
 }
 
-FMOD_RESULT Plugin_Reset                     (FMOD_DSP_STATE *dsp_state)
-{
-    return FMOD_OK;
-}
-
-FMOD_RESULT F_CALLBACK Plugin_Read(FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels)
-{
-    //*outbuffer = *inbuffer;
-    return FMOD_OK;
-}
-
-FMOD_RESULT Plugin_Process                   (FMOD_DSP_STATE *dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY *inbufferarray, FMOD_DSP_BUFFER_ARRAY *outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op)
+FMOD_RESULT F_CALLBACK Plugin_Process                   (FMOD_DSP_STATE *dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY *inbufferarray, FMOD_DSP_BUFFER_ARRAY *outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op)
 {
     switch (op) {
         case FMOD_DSP_PROCESS_QUERY:
@@ -173,29 +154,16 @@ FMOD_RESULT Plugin_Process                   (FMOD_DSP_STATE *dsp_state, unsigne
     return FMOD_OK;
 }
 
-FMOD_RESULT Plugin_ShouldIProcess            (FMOD_DSP_STATE *dsp_state, FMOD_BOOL inputsidle, unsigned int length, FMOD_CHANNELMASK inmask, int inchannels, FMOD_SPEAKERMODE speakermode)
-{
-    if (inputsidle)
-        return FMOD_ERR_DSP_DONTPROCESS;
-    return FMOD_OK;
-}
-
-FMOD_RESULT Plugin_SetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL value)
+FMOD_RESULT F_CALLBACK Plugin_SetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL value)
 {
     TOmSSilenceState* state = (TOmSSilenceState* )dsp_state->plugindata;
     state->SetMute(value);
     return FMOD_OK;
 }
 
-FMOD_RESULT Plugin_GetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL *value, char *valuestr)
+FMOD_RESULT F_CALLBACK Plugin_GetBool             (FMOD_DSP_STATE *dsp_state, int index, FMOD_BOOL *value, char *valuestr)
 {
     TOmSSilenceState* state = (TOmSSilenceState* )dsp_state->plugindata;
     *value = state->GetMute();
     return FMOD_OK;
 }
-
-
-
-
-
-
